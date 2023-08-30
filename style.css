@@ -11,3 +11,19 @@ i{
 i:hover{
     cursor: pointer;
 }
+
+.rotate45{
+    transform: rotate(45deg);
+}
+
+.rotate90{
+    transform: rotate(90deg);
+}
+
+.rotate135{
+    transform: rotate(135deg);
+}
+
+.rotate180{
+    transform: rotate(180deg);
+}
