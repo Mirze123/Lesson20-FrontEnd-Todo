@@ -10,7 +10,11 @@ const tblData = document.getElementById('tblData');
 const tBody = tblData.getElementsByTagName('tbody')[0];
 const hdnRowId = document.getElementById('hdnRowId');
 const txtSearch = document.getElementById('txtSearch');
-
+const orderIcons = document.querySelectorAll('table th div i');
+const ddlStatusFilter = document.getElementById('ddlStatusFilter');
+const btnExport = document.getElementById('btnExport');
+const btnExportPDF = document.getElementById('btnExportPDF');
+const ddlColumns = document.querySelector('.js-select2');
 
 const Mode = {
     insert: 1,
@@ -101,11 +105,11 @@ const getTodoFromFields = () => {
         };
     }
 
-    let id = txtId.value;
+    let id = parseInt(txtId.value);
     let title = txtTitle.value;
     let body = txtBody.value;
-    let priority = ddlPriority.value;
-    let status = ddlStatus.value;
+    let priority = parseInt(ddlPriority.value);
+    let status = parseInt(ddlStatus.value);
 
     let model = {
         id: id,
@@ -174,6 +178,16 @@ const generatePriorityIcon = (priority, icon) => {
 
 }
 
+const generateStatusIcon = (icon, todo) => {
+    icon.className = 'fa-solid fa-circle';
+    if (todo.status == 1) {
+        icon.classList.add('color-green');
+    }
+    else {
+        icon.classList.add('color-red');
+    }
+}
+
 const createTodo = (todo) => {
     let tr = document.createElement('tr');
 
@@ -188,11 +202,14 @@ const createTodo = (todo) => {
     tdId.textContent = todo.id;
     tdTitle.textContent = todo.title;
     tdBody.textContent = todo.body;
-    tdStatus.textContent = todo.status;
 
     let iPriority = document.createElement('i');
     tdPriority.appendChild(iPriority);
     generatePriorityIcon(todo.priority, iPriority);
+
+    let iStatus = document.createElement('i');
+    tdStatus.appendChild(iStatus);
+    generateStatusIcon(iStatus, todo);
 
     let iconEdit = document.createElement('i');
     let iconRemove = document.createElement('i');
@@ -249,11 +266,11 @@ const edit = () => {
     let updatedId = hdnRowId.value;
     let updatedRow = allData.find(x => x.id == updatedId);
 
-    updatedRow.id = txtId.value;
+    updatedRow.id = parseInt(txtId.value);
     updatedRow.title = txtTitle.value;
     updatedRow.body = txtBody.value;
-    updatedRow.priority = ddlPriority.value;
-    updatedRow.status = ddlStatus.value;
+    updatedRow.priority = parseInt(ddlPriority.value);
+    updatedRow.status = parseInt(ddlStatus.value);
 
     saveDataToLS(allData, 'db');
     renderTodos(allData);
@@ -315,6 +332,90 @@ const onFlySearch = (e) => {
     renderTodos(filteredData);
 }
 
+const generateNewId = () => {
+    let allData = getDataFromLS('db');
+    let nextId;
+    if (allData.length === 0) {
+        nextId = 1;
+    }
+    else {
+        let currentLastStep = allData.sort((a, b) => b.id - a.id)[0].id;
+        nextId = currentLastStep + 1;
+    }
+
+    txtId.value = nextId;
+}
+
+const sortColumn = (e) => {
+    let orderCase = e.target.dataset.orderCase;
+    let orderType = e.target.dataset.orderType;
+    let orderDataType = e.target.dataset.orderDataType;
+    let allData = getDataFromLS('db');
+
+    if (orderDataType == 'number') {
+        allData = allData.sort((a, b) => {
+            return orderType == 'asc'
+                ? a[orderCase] - b[orderCase]
+                : b[orderCase] - a[orderCase];
+        })
+    }
+    else if (orderDataType == 'string') {
+        allData = allData.sort((a, b) => {
+            return orderType == 'asc'
+                ? a[orderCase].localeCompare(b[orderCase])
+                : b[orderCase].localeCompare(a[orderCase]);
+        });
+    }
+
+    renderTodos(allData);
+
+}
+
+const bindOrderEventToIcons = () => {
+    orderIcons.forEach(icon => {
+        icon.addEventListener('click', sortColumn);
+    });
+}
+
+const doStatusFilterOperation = (e) => {
+    let selectedValue = e.target.value;
+    let allData = getDataFromLS('db');
+
+    if (selectedValue != 0) {
+        allData = allData.filter(x => x.status == selectedValue);
+    }
+    renderTodos(allData);
+}
+
+const exportToExcel = () => {
+
+
+    //parse data to json
+    var jsonData = getDataFromLS('db');
+
+
+    //create worksheet
+    let workSheet = XLSX.utils.json_to_sheet(jsonData);
+
+    //create workbook
+    let workBook = XLSX.utils.book_new();
+
+    //append sheet into workbook with name parameter => 3-rd parameter is sheet name parameter
+    XLSX.utils.book_append_sheet(workBook, workSheet, 'Sheet1');
+
+    //generate excel workbook with file name
+    XLSX.writeFile(workBook, 'file.xlsx');
+}
+
+const exportToPDF = () => {
+
+
+}
+
+const renderColumnsWithFilter = (items) =>{
+    
+}
+
 const pageLoad = () => {
     // set insert mode when page is first load
     currentPageMode = Mode.insert;
@@ -322,10 +423,28 @@ const pageLoad = () => {
     txtSearch.addEventListener('keyup', onFlySearch);
     btnNew.addEventListener('click', () => {
         currentPageMode = Mode.insert;
+        generateNewId();
+    });
+    ddlStatusFilter.addEventListener('change', doStatusFilterOperation)
+    btnExport.addEventListener('click', exportToExcel);
+    btnExportPDF.addEventListener('click', exportToPDF);
+    // ddlColumns.addEventListener('change',(e)=>{
+    //    console.log( $('.js-select2').select2("val"));
+    // })
+
+    $(".js-select2").on("select2:select select2:unselect", function (e) {
+        var items= $(this).val();
+        renderColumnsWithFilter(items);    
     });
 
     const allData = getDataFromLS('db');
     renderTodos(allData);
+
+    //set id field disable
+    txtId.disabled = true;
+    bindOrderEventToIcons();
+    $('.js-select2').select2();
+    
 }
 
 document.addEventListener('DOMContentLoaded', pageLoad);

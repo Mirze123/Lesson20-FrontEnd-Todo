@@ -27,3 +27,25 @@ i:hover{
 .rotate180{
     transform: rotate(180deg);
 }
+
+.color-red{
+    color: red !important;
+}
+
+.color-green{
+    color: green !important;
+}
+
+table tr th div{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+table tr th div i:first-child{
+    margin-right: 10px;
+}
+
+.select2-container{
+    width: 100% !important;
+}
