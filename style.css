@@ -36,13 +36,13 @@ i:hover{
     color: green !important;
 }
 
-table tr th div{
+.container-header-div{
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-table tr th div i:first-child{
+.i-mr{
     margin-right: 10px;
 }
 

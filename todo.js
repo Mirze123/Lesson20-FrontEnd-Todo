@@ -10,7 +10,6 @@ const tblData = document.getElementById('tblData');
 const tBody = tblData.getElementsByTagName('tbody')[0];
 const hdnRowId = document.getElementById('hdnRowId');
 const txtSearch = document.getElementById('txtSearch');
-const orderIcons = document.querySelectorAll('table th div i');
 const ddlStatusFilter = document.getElementById('ddlStatusFilter');
 const btnExport = document.getElementById('btnExport');
 const btnExportPDF = document.getElementById('btnExportPDF');
@@ -37,6 +36,14 @@ const Messages = {
     validationSuccessMessage: 'Validation is successfull',
     validationErrorMessage: "You have empty fields"
 }
+
+const Columns = {
+    id: 1,
+    title: 2,
+    body: 3,
+    priority: 4,
+    status: 5
+};
 
 let currentPageMode;
 
@@ -188,28 +195,23 @@ const generateStatusIcon = (icon, todo) => {
     }
 }
 
+const createBodyTd = (hasChild, cellValue, childElement) => {
+    let td = document.createElement('td');
+    if (!hasChild) {
+        td.textContent = cellValue;
+    }
+    else {
+        let childTag = document.createElement(childElement);
+        td.appendChild(childTag);
+    }
+    return td;
+}
+
 const createTodo = (todo) => {
     let tr = document.createElement('tr');
 
     let tdEdit = document.createElement('td');
     let tdRemove = document.createElement('td');
-    let tdId = document.createElement('td');
-    let tdTitle = document.createElement('td');
-    let tdBody = document.createElement('td');
-    let tdPriority = document.createElement('td');
-    let tdStatus = document.createElement('td');
-
-    tdId.textContent = todo.id;
-    tdTitle.textContent = todo.title;
-    tdBody.textContent = todo.body;
-
-    let iPriority = document.createElement('i');
-    tdPriority.appendChild(iPriority);
-    generatePriorityIcon(todo.priority, iPriority);
-
-    let iStatus = document.createElement('i');
-    tdStatus.appendChild(iStatus);
-    generateStatusIcon(iStatus, todo);
 
     let iconEdit = document.createElement('i');
     let iconRemove = document.createElement('i');
@@ -231,14 +233,37 @@ const createTodo = (todo) => {
     // appending all td's into tr
     tr.appendChild(tdEdit);
     tr.appendChild(tdRemove);
-    tr.appendChild(tdId);
-    tr.appendChild(tdTitle);
-    tr.appendChild(tdBody);
-    tr.appendChild(tdPriority);
-    tr.appendChild(tdStatus);
 
+    // get selected columns values
+    let selectedColumns = $('.js-select2').val();
 
-
+    for (const value of selectedColumns) {
+        switch (parseInt(value)) {
+            case Columns.id:
+                tr.appendChild(createBodyTd(false, todo.id, null));
+                break;
+            case Columns.title:
+                tr.appendChild(createBodyTd(false, todo.title, null));
+                break;
+            case Columns.body:
+                tr.appendChild(createBodyTd(false, todo.body, null));
+                break;
+            case Columns.priority:
+                var td = createBodyTd(true, null, 'i');
+                var icon = td.children[0];
+                generatePriorityIcon(todo.priority, icon);
+                tr.appendChild(td);
+                break;
+            case Columns.status:
+                var td = createBodyTd(true, null, 'i');
+                var icon = td.children[0];
+                generateStatusIcon(icon, todo);
+                tr.appendChild(td);
+                break;
+            default:
+                break;
+        }
+    }
     return tr;
 }
 
@@ -372,6 +397,7 @@ const sortColumn = (e) => {
 }
 
 const bindOrderEventToIcons = () => {
+    const orderIcons = document.querySelectorAll('table th div i');
     orderIcons.forEach(icon => {
         icon.addEventListener('click', sortColumn);
     });
@@ -412,13 +438,101 @@ const exportToPDF = () => {
 
 }
 
-const renderColumnsWithFilter = (items) =>{
-    
+const generateOrderIconsForHeader = (className, colName, orderType, colType) => {
+    let i = document.createElement('i');
+    i.className = className;
+    i.setAttribute('data-order-case', colName.toLowerCase());
+    i.setAttribute('data-order-type', orderType);
+    i.setAttribute('data-order-data-type', colType.toLowerCase());
+
+    return i;
+}
+
+const createHeaderTh = (colName, colType) => {
+    let th = document.createElement('th');
+    let containerDiv = document.createElement('div');
+    let titleSpan = document.createElement('span');
+    titleSpan.textContent = colName;
+    containerDiv.classList.add('container-header-div');
+
+    let divForIcons = document.createElement('div');
+    const iDesc = generateOrderIconsForHeader('fa-solid fa-arrow-up', colName, 'desc', colType);
+    const iAsc = generateOrderIconsForHeader('fa-solid fa-arrow-down', colName, 'asc', colType);
+
+    iDesc.classList.add('i-mr');
+
+    divForIcons.appendChild(iDesc);
+    divForIcons.appendChild(iAsc);
+    containerDiv.appendChild(titleSpan);
+    containerDiv.appendChild(divForIcons);
+    th.appendChild(containerDiv);
+    return th;
+}
+
+const generateTableHeader = () => {
+
+
+
+    // get tr from thead
+    const tr = document.querySelector('#tblData thead tr');
+
+    //clear all th before generating process
+    tr.innerHTML = '';
+
+    // create and append initial const th Cell
+    const thColspan2 = document.createElement('td');
+    thColspan2.colSpan = 2;
+    tr.appendChild(thColspan2);
+
+    // get Selected Columns
+    const selectedColumns = $('.js-select2').val();
+
+
+    for (const value of selectedColumns) {
+        switch (parseInt(value)) {
+            case Columns.id:
+                tr.appendChild(createHeaderTh('ID', 'number',))
+                break;
+            case Columns.title:
+                tr.appendChild(createHeaderTh('Title', 'string'));
+                break;
+            case Columns.body:
+                tr.appendChild(createHeaderTh('Body', 'string'));
+                break;
+            case Columns.priority:
+                tr.appendChild(createHeaderTh('Priority', 'number'));
+                break;
+            case Columns.status:
+                tr.appendChild(createHeaderTh('Status', 'number'));
+                break;
+            default:
+                break;
+        }
+    }
+}
+
+const reGenerateTableWithSelectedCols = () => {
+    generateTableHeader();
+    const allData = getDataFromLS('db');
+    renderTodos(allData);
 }
 
 const pageLoad = () => {
     // set insert mode when page is first load
     currentPageMode = Mode.insert;
+
+    // check all column in ddl
+    $('select[multiple]').multiselect({
+        selectAll: true,
+        onOptionClick: reGenerateTableWithSelectedCols,
+        onSelectAll: reGenerateTableWithSelectedCols
+    });
+    const aSelectAll = document.querySelector('.ms-options .ms-selectall');
+    aSelectAll.click();
+
+    //create table header
+    generateTableHeader();
+
     btnSave.addEventListener('click', save);
     txtSearch.addEventListener('keyup', onFlySearch);
     btnNew.addEventListener('click', () => {
@@ -428,14 +542,8 @@ const pageLoad = () => {
     ddlStatusFilter.addEventListener('change', doStatusFilterOperation)
     btnExport.addEventListener('click', exportToExcel);
     btnExportPDF.addEventListener('click', exportToPDF);
-    // ddlColumns.addEventListener('change',(e)=>{
-    //    console.log( $('.js-select2').select2("val"));
-    // })
 
-    $(".js-select2").on("select2:select select2:unselect", function (e) {
-        var items= $(this).val();
-        renderColumnsWithFilter(items);    
-    });
+
 
     const allData = getDataFromLS('db');
     renderTodos(allData);
@@ -443,8 +551,8 @@ const pageLoad = () => {
     //set id field disable
     txtId.disabled = true;
     bindOrderEventToIcons();
-    $('.js-select2').select2();
-    
+
+
 }
 
 document.addEventListener('DOMContentLoaded', pageLoad);

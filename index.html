@@ -17,7 +17,7 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     />
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="jquery.multiselect.css">
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
@@ -41,18 +41,22 @@
                 New
               </button>
             </div>
-            <div class="col-4">
-                <select class="js-select2" name="states[]" multiple="multiple">
-                    <option value="1" data-badge="">ID</option>
-                    <option value="2" data-badge="">Title</option>
-                    <option value="3" data-badge="">Body</option>
-                    <option value="4" data-badge="">Priority</option>
-                    <option value="5" data-badge="">Status</option>
-                </select>
-            </div>
             <div class="col-2">
-              <button id="btnExport" class="btn btn-primary">Export Excel</button>
-              <button id="btnExportPDF" class="btn btn-primary">Export PDF</button>
+              <select class="js-select2" name="states[]" multiple="multiple">
+                <option value="1" data-badge="">ID</option>
+                <option value="2" data-badge="">Title</option>
+                <option value="3" data-badge="">Body</option>
+                <option value="4" data-badge="">Priority</option>
+                <option value="5" data-badge="">Status</option>
+              </select>
+            </div>
+            <div class="col-4">
+              <button id="btnExport" class="btn btn-primary">
+                Export Excel
+              </button>
+              <button id="btnExportPDF" class="btn btn-primary">
+                Export PDF
+              </button>
             </div>
             <div class="col-2 d-flex justify-content-center align-items-center">
               <label for="ddlStatusFilter">Status:</label>
@@ -81,8 +85,8 @@
           >
             <thead>
               <tr>
-                <th colspan="2"></th>
-                <th>
+                <!-- <th colspan="2"></th> -->
+                <!-- <th>
                   <div>
                     <span>ID</span>
                     <div>
@@ -176,7 +180,7 @@
                       ></i>
                     </div>
                   </div>
-                </th>
+                </th> -->
               </tr>
             </thead>
             <tbody></tbody>
@@ -286,19 +290,20 @@
       crossorigin="anonymous"
     ></script>
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" 
-        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" 
-        crossorigin="anonymous"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js" integrity="sha512-2ImtlRlf2VVmiGZsjm9bEyhjGW4dU7B6TNwh/hx/iSByxNENtj3WVE6o/9Lj4TJeVXPi4bnOIMXFIJJAeufa0A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-        <script src="tableHTMLExport.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.4.1/jspdf.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/2.3.5/jspdf.plugin.autotable.min.js"></script>
+    <script
+      src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+      integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.4.1/jspdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/2.3.5/jspdf.plugin.autotable.min.js"></script>
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.core.min.js"
       integrity="sha512-UhlYw//T419BPq/emC5xSZzkjjreRfN3426517rfsg/XIEC02ggQBb680V0VvP+zaDZ78zqse3rqnnI5EJ6rxA=="
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     ></script>
+    <script src="jquery.multiselect.js"></script>
     <script src="todo.js"></script>
   </body>
 </html>
